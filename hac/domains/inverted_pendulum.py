@@ -46,6 +46,7 @@ class InvertedPendulumEnv(gym.Env):
         self.project_state_to_subgoal = lambda sim, state: np.array([bound_angle(sim.data.qpos[0]), 15 if state[2] > 15 else -15 if state[2] < -15 else state[2]])
 
         subgoal_bounds = np.array([[-np.pi,np.pi],[-15,15]])
+        self.state_bounds = np.array([[-np.pi,np.pi],[-np.pi,np.pi],[-15,15]])
 
         # Configs for agent
         agent_params = {}
@@ -130,7 +131,7 @@ class InvertedPendulumEnv(gym.Env):
                     self.sim.data.qvel])
 
     # Reset simulation to state within initial state specified by user
-    def reset(self):
+    def reset(self, next_goal = None):
 
         self.steps_cnt = 0
 

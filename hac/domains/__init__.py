@@ -1,4 +1,5 @@
 from gym.envs.registration import register
+from hbaselines.envs.mixed_autonomy.envs.ring_nonflow import RingEnv
 
 register(
     id='hac-inverted-pendulum-v0',

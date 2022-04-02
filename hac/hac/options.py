@@ -104,6 +104,20 @@ def parse_options():
         help='Name of the environment'
     )    
 
+
+    parser.add_argument(
+        '--et',
+        type=str,
+        default='surprise',
+        help='Exploration Technique: default surprise'
+    )  
+
+    parser.add_argument(
+        '--sync',
+        action='store_true',
+        help='Include to synchronize exploration across layers'
+    )  
+
     parser.add_argument(
         '--group',
         type=str,

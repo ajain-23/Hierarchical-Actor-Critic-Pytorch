@@ -34,35 +34,37 @@ class MountainCarEnv(gym.Env):
         'video.frames_per_second': 30
     }
 
-    def __init__(self, args, seed, max_actions=1200, num_frames_skip=10, show=False):
+    def __init__(self, args=None, seed=None, max_actions=1200, num_frames_skip=10, show=False):
 
         #################### START CONFIGS #######################
         # TODO: Correct?
-        if args.n_layers in [1]:
-            args.time_scale = 100
-            max_actions = 100
-        elif args.n_layers in [2]:
-            args.time_scale = 20
-            max_actions = 200
-        elif args.n_layers in [3]:
-            args.time_scale = 10
-            max_actions = args.time_scale**args.n_layers
+        if args is not None:
+            if args.n_layers in [1]:
+                args.time_scale = 100
+                max_actions = 100
+            elif args.n_layers in [2]:
+                args.time_scale = 20
+                max_actions = 200
+            elif args.n_layers in [3]:
+                args.time_scale = 10
+                max_actions = args.time_scale**args.n_layers
 
         self.action_dim = 1
         self.action_bounds = [1.0]
         self.action_offset = np.zeros((len(self.action_bounds)))
 
-        self.goal_space_train = [[0.45, 0.48]]
-        self.goal_space_test = [[0.45, 0.48]]
+        self.goal_space_train = [[0.45, 0.48], [0.0, 0.05]]
+        self.goal_space_test = [[0.45, 0.48], [0.0, 0.05]]
         self.endgoal_dim = len(self.goal_space_test)
-        self.endgoal_thresholds = np.array([0.01])
+        self.endgoal_thresholds = np.array([0.01, 0.02])
 
         self.subgoal_bounds = np.array([[-1.2, 0.6],[-0.07, 0.07]])
+        self.state_bounds = self.subgoal_bounds
         self.subgoal_dim = len(self.subgoal_bounds)
 
         # functions to project state to goal
         self.project_state_to_subgoal = lambda sim, state: state
-        self.project_state_to_endgoal = lambda sim, state: [state[0]]
+        self.project_state_to_endgoal = lambda sim, state: state
 
         self.subgoal_bounds_symmetric = np.zeros((len(self.subgoal_bounds)))
         self.subgoal_bounds_offset = np.zeros((len(self.subgoal_bounds)))
@@ -84,7 +86,8 @@ class MountainCarEnv(gym.Env):
         agent_params["subgoal_test_perc"] = 0.3
         agent_params["random_action_perc"] = 0.2
 
-        agent_params["subgoal_penalty"] = -args.time_scale
+        if args is not None:
+            agent_params["subgoal_penalty"] = -args.time_scale
         
         agent_params["atomic_noise"] = [0.1]
         agent_params["subgoal_noise"] = [0.02, 0.01]
@@ -113,13 +116,14 @@ class MountainCarEnv(gym.Env):
         self.viewer = None
         self.show = show
 
-        self.n_layers = args.n_layers
+        if args is not None:
+            self.n_layers = args.n_layers
 
         screen_width = 600
         screen_height = 400
 
-        if self.show:
-            self.viewer = visualize.Viewer(screen_width, screen_height)            
+        # if self.show:
+        #     self.viewer = visualize.Viewer(screen_width, screen_height)            
 
         world_width = self.max_position - self.min_position
         self.scale = screen_width/world_width

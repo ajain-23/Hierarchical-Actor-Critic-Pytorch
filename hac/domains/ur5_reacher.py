@@ -128,6 +128,13 @@ class UR5Env(gym.Env):
         self.num_frames_skip = num_frames_skip
 
         self.steps_cnt = 0
+        state_bound_low = np.full_like(self.get_state(), -2 * np.pi)
+        state_bound_high = np.full_like(self.get_state(), 2 * np.pi)
+        state_bound_low = np.reshape(state_bound_low,(len(state_bound_low),1))
+        state_bound_high = np.reshape(state_bound_high,(len(state_bound_high),1))
+
+        self.state_bounds = np.concatenate((state_bound_low, state_bound_high), 1)
+
         
     # Get state, which concatenates joint positions and velocities
     def get_state(self):

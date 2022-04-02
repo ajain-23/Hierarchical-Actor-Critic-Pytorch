@@ -133,6 +133,15 @@ class AntReacherEnv(gym.Env):
             self.viewer = MjViewer(self.sim)
         self.num_frames_skip = num_frames_skip
 
+        state_bound_low = np.full_like(self.get_state(), -1.0)
+        state_bound_high = np.full_like(self.get_state(), 1.0)
+        state_bound_low = np.reshape(state_bound_low,(len(state_bound_low),1))
+        state_bound_high = np.reshape(state_bound_high,(len(state_bound_high),1))
+
+        self.state_bounds = np.concatenate((state_bound_low, state_bound_high), 1)
+        self.state_bounds[0], self.state_bounds[1], self.state_bounds[3] = np.array([-cage_max_dim, cage_max_dim]), np.array([-cage_max_dim, cage_max_dim]), np.array([0, max_height])
+        self.state_bounds[len(self.sim.data.qpos)], self.state_bounds[len(self.sim.data.qpos) + 1] = np.array([-max_velo, max_velo]), np.array([-max_velo, max_velo])
+
     def get_next_goal(self, test):
         end_goal = np.zeros((len(self.goal_space_test)))
 

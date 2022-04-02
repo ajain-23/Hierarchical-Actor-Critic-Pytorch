@@ -18,7 +18,7 @@ def run_HAC(args, env, agent):
 
     if enable_wandb:
         wandb.init(project=args.env, settings=wandb.Settings(_disable_stats=True), 
-                    entity='hainh22',
+                    entity='ajain23',
                     group=args.group if args.group is not None else '_'.join(["hac", str(args.env), str(args.n_layers)]),
                     name=args.name if args.name is not None else 's' + str(args.seed))
 

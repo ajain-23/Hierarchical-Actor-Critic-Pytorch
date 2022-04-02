@@ -71,7 +71,7 @@ class Layer():
             self.noise_perc = agent_params["atomic_noise"]
         else:
             self.noise_perc = agent_params["subgoal_noise"]
-        
+
         # Create flag to indicate when layer has ran out of attempts to achieve goal.  This will be important for subgoal testing
         self.maxed_out = False
 
@@ -83,17 +83,14 @@ class Layer():
     def add_noise(self, action, env):
 
         # Noise added will be percentage of range
-        # if self.is_top_layer:
-        #     proj_state = env.project_state_to_endgoal(env.sim, self.current_state)
-        # else:
-        #     proj_state = env.project_state_to_subgoal(env.sim, self.current_state)
-
         if self.layer_number == 0:
             action_bounds = env.action_bounds
             action_offset = env.action_offset
+            proj_state = env.project_state_to_endgoal(env.sim, self.current_state)
         else:
             action_bounds = env.subgoal_bounds_symmetric
             action_offset = env.subgoal_bounds_offset
+            proj_state = env.project_state_to_subgoal(env.sim, self.current_state)
 
         assert len(action) == len(action_bounds), "Action bounds must have same dimension as action"
         assert len(action) == len(self.noise_perc), "Noise percentage vector must have same dimension as action"
@@ -101,17 +98,17 @@ class Layer():
         # Add noise to action and ensure remains within bounds
         if self.exploration_technique == ExplorationTechnique.NORMAL:
             action += NormalActionNoise(
-                0, np.multiply(self.noise_perc, action_bounds)
+                0, self.noise_perc * action_bounds
             )()
         elif self.exploration_technique == ExplorationTechnique.OU:
             action += OrnsteinUhlenbeckActionNoise(
-                np.array([0]), np.multiply(self.noise_perc, action_bounds)
+                np.array([0]), self.noise_perc * action_bounds
             )()
         elif self.exploration_technique == ExplorationTechnique.SURPRISE:
             action = (
                 self.explorers
                 .get_action(
-                    torch.FloatTensor(self.current_state).to(device),
+                    torch.FloatTensor(proj_state).to(device),
                     torch.FloatTensor(action).to(device),
                 )
                 .cpu()
@@ -501,14 +498,6 @@ class Layer():
                     agent.layer_learning_started[self.layer_number] = True
 
                 self.actor_critic.update(self.replay_buffer)
-
-                if self.exploration_technique == ExplorationTechnique.SURPRISE:
-                    states, actions, _, next_states, _, _, = self.replay_buffer.get_batch()
-                    states = torch.FloatTensor(states).to(device)
-                    actions = torch.FloatTensor(actions).to(device)
-                    next_states = torch.FloatTensor(next_states).to(device)
-                    self.explorers.update(states, actions, next_states)
-
 
         """
         # To use target networks comment for loop above and uncomment for loop below

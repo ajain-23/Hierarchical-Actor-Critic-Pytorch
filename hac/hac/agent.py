@@ -133,10 +133,10 @@ class Agent():
         # Select initial state from in initial state space
         if self.args.env in ['hac-ant-four-rooms-v0', 'hac-ant-reacher-v0']:
             next_goal = self.goal_array[self.args.n_layers - 1]
+            self.current_state = env.reset(next_goal=next_goal)
         else:
             next_goal = None
-
-        self.current_state = env.reset(next_goal)
+            self.current_state = env.reset()
         # print("Initial State: ", self.current_state)
 
         # Reset step counter
